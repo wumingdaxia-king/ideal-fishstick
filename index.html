@@ -1,0 +1,84 @@
+
+import streamlit as st
+from pathlib import Path
+import base64
+from streamlit.components.v1 import html
+
+# ---------- 页面配置 ----------
+st.set_page_config(page_title="提瓦特旅行纪 · 主页")
+
+# ---------- 背景图 ----------
+def get_img_base64(img_path: str) -> str:
+    img = Path(img_path)
+    return base64.b64encode(img.read_bytes()).decode() if img.exists() else ""
+
+bg_base64 = get_img_base64("images/原神.jpg")
+st.markdown(
+    f"""
+    <style>
+    .stApp {{
+        background-image: linear-gradient(rgba(255,255,255,0.3), rgba(255,255,255,0.3)),
+                          url("data:image/jpg;base64,{bg_base64}");
+        background-size: cover; background-position: center;
+    }}
+    .main .block-container {{
+        background-color: rgba(255,255,255,0.8);
+        border-radius: 15px; padding: 2rem; margin-top: 2rem; backdrop-filter: blur(3px);
+    }}
+    h1 {{ color: #333 !important; }}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+# ---------- 音乐 ----------
+def autoplay_audio(file_path: str):
+    if not Path(file_path).exists():
+        return
+    b64 = base64.b64encode(Path(file_path).read_bytes()).decode()
+    html(
+        f"""
+        <audio id="bgMusic" autoplay loop style="display:none">
+          <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+        </audio>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {{
+            const a = document.getElementById('bgMusic');
+            a.volume = 0.6;
+            a.play().catch(() => {{
+                document.getElementById('musicHint').style.display = 'block';
+            }});
+        }});
+        </script>
+        <div id="musicHint" style="display:none;position:fixed;bottom:20px;right:20px;
+             background:white;padding:10px;border-radius:10px;cursor:pointer"
+             onclick="this.style.display='none';document.getElementById('bgMusic').play();">
+            ▶️ 点击播放音乐
+        </div>
+        """
+    )
+
+autoplay_audio("music/主题曲《经过》.mp3")
+
+# ---------- 正文 ----------
+st.write("# 提瓦特旅行纪")
+
+
+# ---------- 故事描述（去掉了重复国家列表） ----------
+st.markdown(
+    """
+<div style="padding: 20px;">
+<h3 style="color: #555;">这是一个不同以往的传奇故事：</h3>
+<ul style="font-size: 1.1rem; line-height: 2;">
+<li><b style="color: #00CED1;">见证自由的囚笼</b> - 蒙德的风吹散了旧日的枷锁</li>
+<li><b style="color: #FFD700;">目睹契约的陨落</b> - 璃月的磐石终将风化</li>
+<li><b style="color: #9370DB;">跨越永恒的封锁</b> - 稻妻的雷光划破长夜</li>
+<li><b style="color: #32CD32;">触碰智慧的边界</b> - 须弥的雨林藏着禁忌</li>
+<li><b style="color: #1E90FF;">审判正义的罪孽</b> - 枫丹的法庭上演闹剧</li>
+<li><b style="color: #FF69B4;">助燃战争的余烬</b> - 纳塔的火焰永不熄灭</li>
+<li><b style="color: #FF1493;">抵达爱的理想乡</b> - 至冬的冰雪终将融化</li>
+</ul>
+</div>
+    """,
+    unsafe_allow_html=True,
+)
