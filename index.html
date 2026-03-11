@@ -1,84 +1,1540 @@
-
-import streamlit as st
-from pathlib import Path
-import base64
-from streamlit.components.v1 import html
-
-# ---------- 页面配置 ----------
-st.set_page_config(page_title="提瓦特旅行纪 · 主页")
-
-# ---------- 背景图 ----------
-def get_img_base64(img_path: str) -> str:
-    img = Path(img_path)
-    return base64.b64encode(img.read_bytes()).decode() if img.exists() else ""
-
-bg_base64 = get_img_base64("images/原神.jpg")
-st.markdown(
-    f"""
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小危 - 危情沦陷游戏设计助手</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-    .stApp {{
-        background-image: linear-gradient(rgba(255,255,255,0.3), rgba(255,255,255,0.3)),
-                          url("data:image/jpg;base64,{bg_base64}");
-        background-size: cover; background-position: center;
-    }}
-    .main .block-container {{
-        background-color: rgba(255,255,255,0.8);
-        border-radius: 15px; padding: 2rem; margin-top: 2rem; backdrop-filter: blur(3px);
-    }}
-    h1 {{ color: #333 !important; }}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        h1 {
+            color: #ff6b6b;
+            font-size: 3rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #b0b0b0;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+        
+        .sidebar {
+            background: rgba(30, 30, 60, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .content {
+            background: rgba(30, 30, 60, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            color: #ff6b6b;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ff6b6b;
+        }
+        
+        .character-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .character-card {
+            background: rgba(40, 40, 80, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .character-card:hover {
+            background: rgba(50, 50, 100, 0.8);
+            transform: translateY(-3px);
+        }
+        
+        .character-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #ff9e6b;
+            margin-bottom: 5px;
+        }
+        
+        .character-stats {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        
+        .stat {
+            background: rgba(60, 60, 100, 0.8);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .card-colors {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .color-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        
+        .blue {
+            background: #4a8be5;
+        }
+        
+        .pink {
+            background: #e56bc4;
+        }
+        
+        .purple {
+            background: #a56be5;
+        }
+        
+        .character-details {
+            display: none;
+        }
+        
+        .character-details.active {
+            display: block;
+        }
+        
+        .skill-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .skill-item {
+            background: rgba(40, 40, 80, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid #4a8be5;
+        }
+        
+        .skill-name {
+            font-weight: bold;
+            color: #4a8be5;
+            margin-bottom: 5px;
+        }
+        
+        .skill-desc {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+        }
+        
+        .action-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .action-item {
+            background: rgba(40, 40, 80, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border-left: 4px solid #e56bc4;
+        }
+        
+        .action-name {
+            font-weight: bold;
+            color: #e56bc4;
+            margin-bottom: 5px;
+        }
+        
+        .combo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .combo-item {
+            background: rgba(40, 40, 80, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid #a56be5;
+        }
+        
+        .combo-name {
+            font-weight: bold;
+            color: #a56be5;
+            margin-bottom: 5px;
+        }
+        
+        .season-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .season-item {
+            background: rgba(40, 40, 80, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid #ff9e6b;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .season-item:hover {
+            background: rgba(50, 50, 100, 0.8);
+            transform: translateY(-3px);
+        }
+        
+        .season-name {
+            font-weight: bold;
+            color: #ff9e6b;
+            margin-bottom: 5px;
+        }
+        
+        .season-desc {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+        }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ff6b6b;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid #ff6b6b;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            background: rgba(40, 40, 80, 0.8);
+            border: 1px solid #4a8be5;
+            border-radius: 8px;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+        
+        /* 赛季详情页面样式 */
+        .season-detail {
+            display: none;
+        }
+        
+        .season-detail.active {
+            display: block;
+        }
+        
+        .back-btn {
+            background: #4a8be5;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #5a9be5;
+        }
+        
+        .skin-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .skin-item {
+            background: rgba(40, 40, 80, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid;
+        }
+        
+        .skin-common {
+            border-left-color: #b0b0b0;
+        }
+        
+        .skin-rare {
+            border-left-color: #4a8be5;
+        }
+        
+        .skin-precious {
+            border-left-color: #e56bc4;
+        }
+        
+        .skin-collection {
+            border-left-color: #ff9e6b;
+        }
+        
+        .skin-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .skin-quality {
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        
+        .quality-common {
+            background: #b0b0b0;
+            color: #333;
+        }
+        
+        .quality-rare {
+            background: #4a8be5;
+            color: white;
+        }
+        
+        .quality-precious {
+            background: #e56bc4;
+            color: white;
+        }
+        
+        .quality-collection {
+            background: #ff9e6b;
+            color: white;
+        }
+        
+        .replace-cards {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .replace-card {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .replace-blue {
+            background: #4a8be5;
+        }
+        
+        .replace-pink {
+            background: #e56bc4;
+        }
+        
+        .replace-purple {
+            background: #a56be5;
+        }
+        
+        .skin-effect {
+            font-size: 0.9rem;
+            margin-top: 8px;
+            color: #b0b0b0;
+        }
+        
+        .birthday-info {
+            background: rgba(255, 107, 107, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .gameplay-info {
+            background: rgba(74, 139, 229, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .clothing-levels {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .clothing-level {
+            background: rgba(40, 40, 80, 0.8);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .level-name {
+            font-weight: bold;
+            color: #ff9e6b;
+            margin-bottom: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .skin-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .clothing-levels {
+                flex-direction: column;
+            }
+        }
     </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-# ---------- 音乐 ----------
-def autoplay_audio(file_path: str):
-    if not Path(file_path).exists():
-        return
-    b64 = base64.b64encode(Path(file_path).read_bytes()).decode()
-    html(
-        f"""
-        <audio id="bgMusic" autoplay loop style="display:none">
-          <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
-        </audio>
-        <script>
-        document.addEventListener('DOMContentLoaded', () => {{
-            const a = document.getElementById('bgMusic');
-            a.volume = 0.6;
-            a.play().catch(() => {{
-                document.getElementById('musicHint').style.display = 'block';
-            }});
-        }});
-        </script>
-        <div id="musicHint" style="display:none;position:fixed;bottom:20px;right:20px;
-             background:white;padding:10px;border-radius:10px;cursor:pointer"
-             onclick="this.style.display='none';document.getElementById('bgMusic').play();">
-            ▶️ 点击播放音乐
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>小危 - 危情沦陷游戏设计助手</h1>
+            <p class="subtitle">辅助创作工具 - 角色、技能、赛季信息一览</p>
+        </header>
+        
+        <div class="tab-container">
+            <div class="tab active" data-tab="characters">角色信息</div>
+            <div class="tab" data-tab="skills">技能系统</div>
+            <div class="tab" data-tab="combos">连招系统</div>
+            <div class="tab" data-tab="seasons">赛季信息</div>
+            <div class="tab" data-tab="gameplay">游戏玩法</div>
         </div>
-        """
-    )
+        
+        <input type="text" class="search-box" placeholder="搜索角色、技能或赛季...">
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="section">
+                    <h2 class="section-title">角色列表</h2>
+                    <div class="character-list">
+                        <div class="character-card" data-character="kongchan">
+                            <div class="character-name">空禅</div>
+                            <div class="character-stats">
+                                <div class="stat">攻击: 5</div>
+                                <div class="stat">充能: 4</div>
+                                <div class="stat">技能: 群伤 各10</div>
+                            </div>
+                            <div class="card-colors">
+                                <div class="color-dot blue"></div>
+                                <div class="color-dot blue"></div>
+                                <div class="color-dot blue"></div>
+                                <div class="color-dot pink"></div>
+                                <div class="color-dot pink"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="character-card" data-character="qinzheng">
+                            <div class="character-name">秦政</div>
+                            <div class="character-stats">
+                                <div class="stat">攻击: 12</div>
+                                <div class="stat">充能: 6</div>
+                                <div class="stat">技能: 单体 60</div>
+                            </div>
+                            <div class="card-colors">
+                                <div class="color-dot purple"></div>
+                                <div class="color-dot purple"></div>
+                                <div class="color-dot blue"></div>
+                                <div class="color-dot blue"></div>
+                                <div class="color-dot pink"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="character-card" data-character="xiangzhiyao">
+                            <div class="character-name">向之遥</div>
+                            <div class="character-stats">
+                                <div class="stat">攻击: 10</div>
+                                <div class="stat">充能: 5</div>
+                                <div class="stat">技能: 单体 40</div>
+                            </div>
+                            <div class="card-colors">
+                                <div class="color-dot pink"></div>
+                                <div class="color-dot pink"></div>
+                                <div class="color-dot pink"></div>
+                                <div class="color-dot purple"></div>
+                                <div class="color-dot purple"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="character-card" data-character="yaozilin">
+                            <div class="character-name">姚子麟</div>
+                            <div class="character-stats">
+                                <div class="stat">攻击: 15</div>
+                                <div class="stat">充能: 8</div>
+                                <div class="stat">技能: 群伤 各10</div>
+                            </div>
+                            <div class="card-colors">
+                                <div class="color-dot purple"></div>
+                                <div class="color-dot purple"></div>
+                                <div class="color-dot purple"></div>
+                                <div class="color-dot purple"></div>
+                                <div class="color-dot pink"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">服装等级</h2>
+                    <div class="clothing-levels">
+                        <div class="clothing-level">
+                            <div class="level-name">初始</div>
+                            <div class="skin-effect">基础外观</div>
+                        </div>
+                        <div class="clothing-level">
+                            <div class="level-name">常见</div>
+                            <div class="skin-effect">外观改变</div>
+                        </div>
+                        <div class="clothing-level">
+                            <div class="level-name">稀有</div>
+                            <div class="skin-effect">技能颜色特效改变</div>
+                        </div>
+                        <div class="clothing-level">
+                            <div class="level-name">珍贵</div>
+                            <div class="skin-effect">技能表现形式改变</div>
+                        </div>
+                        <div class="clothing-level">
+                            <div class="level-name">典藏</div>
+                            <div class="skin-effect">尽情期待</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <!-- 角色信息标签页 -->
+                <div class="tab-content active" id="characters">
+                    <div class="section">
+                        <h2 class="section-title">角色详情</h2>
+                        <div class="character-details active" id="kongchan-details">
+                            <h3>空禅 - 得道功德佛</h3>
+                            <div class="birthday-info">
+                                <p><strong>生日：</strong>8月12日</p>
+                            </div>
+                            <p><strong>初始服装：</strong>得道功德佛</p>
+                            <p><strong>典藏皮肤可替换卡：</strong>1蓝1紫</p>
+                            
+                            <div class="skill-list">
+                                <div class="skill-item">
+                                    <div class="skill-name">初始技能·真传奥义</div>
+                                    <div class="skill-desc">8回合CD。将一张手牌替换为同色自己的牌。</div>
+                                </div>
+                            </div>
+                            
+                            <div class="action-list">
+                                <div class="action-item">
+                                    <div class="action-name">念经</div>
+                                    <div class="skill-desc">动作1</div>
+                                </div>
+                                <div class="action-item">
+                                    <div class="action-name">拂尘扬沙</div>
+                                    <div class="skill-desc">动作2</div>
+                                </div>
+                                <div class="action-item">
+                                    <div class="action-name">扔出念珠</div>
+                                    <div class="skill-desc">动作3</div>
+                                </div>
+                                <div class="action-item">
+                                    <div class="action-name">大佛冲击波</div>
+                                    <div class="skill-desc">动作4</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="character-details" id="qinzheng-details">
+                            <h3>秦政 - 赤龙骁勇</h3>
+                            <div class="birthday-info">
+                                <p><strong>生日：</strong>12月9日</p>
+                            </div>
+                            <p><strong>初始服装：</strong>赤龙骁勇</p>
+                            <p><strong>典藏皮肤可替换卡：</strong>1粉1紫</p>
+                            
+                            <div class="skill-list">
+                                <div class="skill-item">
+                                    <div class="skill-name">初始技能·冰与火之歌</div>
+                                    <div class="skill-desc">8回合CD。清除敌人当前的所有增益。</div>
+                                </div>
+                            </div>
+                            
+                            <div class="action-list">
+                                <div class="action-item">
+                                    <div class="action-name">扔出并收回长矛</div>
+                                    <div class="skill-desc">动作1</div>
+                                </div>
+                                <div class="action-item">
+                                    <div class="action-name">旋转甩出并收回长矛</div>
+                                    <div class="skill-desc">动作2</div>
+                                </div>
+                                <div class="action-item">
+                                    <div class="action-name">持长矛坠击</div>
+                                    <div class="skill-desc">动作3</div>
+                                </div>
+                                <div class="action-item">
+                                    <div class="action-name">率兵马冲锋</div>
+                                    <div class="skill-desc">动作4</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="character-details" id="xiangzhiyao-details">
+                            <h3>向之遥 - 「赫尔墨斯」</h3>
+                            <div class="birthday-info">
+                                <p><strong>生日：</strong>6月16日</p>
+                            </div>
+                            <p><strong>初始服装：</strong>赫尔墨斯</p>
+                            <p><strong>典藏皮肤可替换卡：</strong>1蓝1紫</p>
+                            
+                            <div class="skill-list">
+                                <div class="skill-item">
+                                    <div class="skill-name">初始技能·赞颂慷慨而富裕</div>
+                                    <div class="skill-desc">8回合CD。赋予我方无敌（1回合）。</div>
+                                </div>
+                            </div>
+                            
+                            <div class="action-list">
+                                <div class="action-item">
+                                    <div class="action-name">右手拳击</div>
+                                    <div class="skill-desc">动作1</div>
+                                </div>
+                                <div class="action-item">
+                                    <div class="action-name">双手重击</div>
+                                    <div class="skill-desc">动作2</div>
+                                </div>
+                                <div class="action-item">
+                                    <div class="action-name">螺旋飞踢</div>
+                                    <div class="skill-desc">动作3</div>
+                                </div>
+                                <div class="action-item">
+                                    <div class="action-name">深吸口气挥出一拳</div>
+                                    <div class="skill-desc">动作4</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="character-details" id="yaozilin-details">
+                            <h3>姚子麟 - 黑焰龙骑士</h3>
+                            <div class="birthday-info">
+                                <p><strong>生日：</strong>3月4日</p>
+                            </div>
+                            <p><strong>初始服装：</strong>黑焰龙骑士</p>
+                            <p><strong>典藏皮肤可替换卡：</strong>1蓝1紫</p>
+                            
+                            <div class="skill-list">
+                                <div class="skill-item">
+                                    <div class="skill-name">初始技能·灼烧灵魂之术</div>
+                                    <div class="skill-desc">8回合CD。使敌方群体全属性降低50%（1回合）。</div>
+                                </div>
+                            </div>
+                            
+                            <div class="action-list">
+                                <div class="action-item">
+                                    <div class="action-name">持剑横挥砍</div>
+                                    <div class="skill-desc">动作1</div>
+                                </div>
+                                <div class="action-item">
+                                    <div class="action-name">十字斩击</div>
+                                    <div class="skill-desc">动作2</div>
+                                </div>
+                                <div class="action-item">
+                                    <div class="action-name">跳跃斩击</div>
+                                    <div class="skill-desc">动作3</div>
+                                </div>
+                                <div class="action-item">
+                                    <div class="action-name">御龙吐息</div>
+                                    <div class="skill-desc">动作4</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 技能系统标签页 -->
+                <div class="tab-content" id="skills">
+                    <div class="section">
+                        <h2 class="section-title">观测技能</h2>
+                        <div class="skill-list">
+                            <div class="skill-item">
+                                <div class="skill-name">治疗术</div>
+                                <div class="skill-desc">三回合冷却。为我方全体回复10%最高生命（1回合）</div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-name">强化术</div>
+                                <div class="skill-desc">七回合冷却。提高我方50%伤害（1回合）</div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-name">凝神聚气</div>
+                                <div class="skill-desc">八回合冷却。提高我方50%暴击率（1回合）</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h2 class="section-title">观测令咒</h2>
+                        <div class="skill-list">
+                            <div class="skill-item">
+                                <div class="skill-name">消耗一划</div>
+                                <div class="skill-desc">回复一位角色满体力</div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-name">消耗三划</div>
+                                <div class="skill-desc">使一位角色充能满</div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-name">消耗五划</div>
+                                <div class="skill-desc">复活我方全体并立即行动</div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-name">消耗七划</div>
+                                <div class="skill-desc">复活我方全体立即行动并刷新观测技能</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 连招系统标签页 -->
+                <div class="tab-content" id="combos">
+                    <div class="section">
+                        <h2 class="section-title">连招系统</h2>
+                        <div class="combo-list">
+                            <div class="combo-item">
+                                <div class="combo-name">养精蓄锐</div>
+                                <div class="skill-desc">三张行动卡均为蓝色理性卡。相关行动者获得1充能，每行动一次额外获得0.5充能。</div>
+                            </div>
+                            <div class="combo-item">
+                                <div class="combo-name">甜蜜暴击</div>
+                                <div class="skill-desc">三张行动卡均为粉色纯真卡。每行动一次，下回合暴击率+25。</div>
+                            </div>
+                            <div class="combo-item">
+                                <div class="combo-name">纵欲无度</div>
+                                <div class="skill-desc">三张行动卡均为紫色欲望卡。行动者造成伤害+50%。</div>
+                            </div>
+                            <div class="combo-item">
+                                <div class="combo-name">连携</div>
+                                <div class="skill-desc">三张行动卡均为同一角色时。该角色可以额外行动一次。</div>
+                            </div>
+                            <div class="combo-item">
+                                <div class="combo-name">缤纷</div>
+                                <div class="skill-desc">三张行动卡均为不同颜色。行动角色也可触发对应加成。</div>
+                            </div>
+                            <div class="combo-item">
+                                <div class="combo-name">连携+缤纷</div>
+                                <div class="skill-desc">三张卡为同一角色且为同一颜色，同时触发【连携】和【缤纷】。</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 赛季信息标签页 -->
+                <div class="tab-content" id="seasons">
+                    <div class="section">
+                        <h2 class="section-title">赛季信息</h2>
+                        <div class="season-list">
+                            <div class="season-item" data-season="s1">
+                                <div class="season-name">S1版本 "重返校园2025"</div>
+                                <div class="season-desc">时间：7月8日 - 8月31日 (54天)</div>
+                                <div class="season-desc">【你】的定位：大学新生</div>
+                            </div>
+                            <div class="season-item" data-season="s2">
+                                <div class="season-name">S2版本 "逃离记"</div>
+                                <div class="season-desc">时间：9月1日 - 10月24日 (54天)</div>
+                                <div class="season-desc">【你】的定位：医生</div>
+                            </div>
+                            <div class="season-item" data-season="s3">
+                                <div class="season-name">S3版本 "童趣睡衣派对"</div>
+                                <div class="season-desc">时间：10月25日 - 12月7日 (54天)</div>
+                                <div class="season-desc">【你】的定位：身着驯兽服的派对主持人</div>
+                            </div>
+                            <div class="season-item" data-season="s4">
+                                <div class="season-name">S4版本 "雪夜古堡事件簿"</div>
+                                <div class="season-desc">时间：12月8日 - 1月22日 (46天)</div>
+                                <div class="season-desc">【你】的定位：侦探</div>
+                            </div>
+                            <div class="season-item" data-season="s5">
+                                <div class="season-name">S5版本 "瑞雪兆丰年"</div>
+                                <div class="season-desc">时间：1月23日 - 3月17日 (54天)</div>
+                                <div class="season-desc">【你】的定位：支教大学生</div>
+                            </div>
+                            <div class="season-item" data-season="s6">
+                                <div class="season-name">S6版本 "欲望，魂牵梦萦"</div>
+                                <div class="season-desc">时间：3月18日 - 5月11日 (54天)</div>
+                                <div class="season-desc">【你】的定位：天使投资人</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 游戏玩法标签页 -->
+                <div class="tab-content" id="gameplay">
+                    <div class="section">
+                        <h2 class="section-title">游戏玩法</h2>
+                        <div class="gameplay-info">
+                            <p><strong>游戏类型：</strong>指令卡战斗（类似FGO）</p>
+                            <p><strong>卡牌克制：</strong>理性卡克制纯真卡，纯真卡克制欲望卡，欲望卡克制理性卡</p>
+                            <p><strong>卡牌颜色：</strong>理性卡为蓝色，纯真卡为粉色，欲望卡为紫色</p>
+                            <p><strong>回合机制：</strong>每回合从不同角色的不同卡中随机获得六张作为当回合手牌，玩家选择三张进行指令引导</p>
+                            <p><strong>充能机制：</strong>行动者每行动一次获得1充能</p>
+                        </div>
+                        
+                        <div class="section">
+                            <h3 class="section-title">服装获取方式</h3>
+                            <div class="skill-list">
+                                <div class="skill-item">
+                                    <div class="skill-name">常驻</div>
+                                    <div class="skill-desc">可随时获取</div>
+                                </div>
+                                <div class="skill-item">
+                                    <div class="skill-name">限时</div>
+                                    <div class="skill-desc">未来会返场</div>
+                                </div>
+                                <div class="skill-item">
+                                    <div class="skill-name">限定</div>
+                                    <div class="skill-desc">永不返场</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 赛季详情页面 -->
+                <div class="season-detail" id="s1-detail">
+                    <button class="back-btn">返回赛季列表</button>
+                    <h2 class="section-title">S1版本 "重返校园2025"</h2>
+                    <p>时间：7月8日 - 8月31日 (54天)</p>
+                    <p>【你】的定位：大学新生</p>
+                    
+                    <div class="section">
+                        <h3 class="section-title">赛季服装</h3>
+                        <div class="skin-list">
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">围棋社长</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">空禅专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">击剑社长</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">秦政专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">跑步社长</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">向之遥专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">篮球社长</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">姚子麟专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-rare">
+                                <div class="skin-name">青葱·围棋社长</div>
+                                <div class="skin-quality quality-rare">稀有</div>
+                                <div class="skin-desc">空禅专属 - 完成十次挑战升级</div>
+                                <div class="skin-effect">技能颜色特效改变</div>
+                            </div>
+                            <div class="skin-item skin-rare">
+                                <div class="skin-name">少年忆·围棋社长</div>
+                                <div class="skin-quality quality-rare">稀有</div>
+                                <div class="skin-desc">空禅专属 - 活动期间完成十次挑战升级</div>
+                                <div class="skin-effect">技能颜色特效改变</div>
+                            </div>
+                            <div class="skin-item skin-precious">
+                                <div class="skin-name">智斗围棋</div>
+                                <div class="skin-quality quality-precious">珍贵</div>
+                                <div class="skin-desc">空禅专属 - S1期间完成20次小游戏"校园躲猫猫"</div>
+                                <div class="skin-effect">技能表现形式改变</div>
+                                <div class="replace-cards">
+                                    <div class="replace-card replace-blue">蓝</div>
+                                </div>
+                            </div>
+                            <div class="skin-item skin-collection">
+                                <div class="skin-name">挥洒汗水的篮球队长</div>
+                                <div class="skin-quality quality-collection">典藏</div>
+                                <div class="skin-desc">姚子麟专属 - S1期间抽取，60发保底</div>
+                                <div class="skin-effect">界面动态服装展示，全新指令卡皮肤·球场旭阳</div>
+                                <div class="replace-cards">
+                                    <div class="replace-card replace-blue">蓝</div>
+                                    <div class="replace-card replace-pink">粉</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">赛季活动</h3>
+                        <div class="skill-list">
+                            <div class="skill-item">
+                                <div class="skill-name">空禅生日活动</div>
+                                <div class="skill-desc">8月12日全服送S赛季通用抽卡券10发，8.10-8.17日限时上架生日礼包</div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-name">全新章节·时空乱流串联羁绊（序章）</div>
+                                <div class="skill-desc">可获得观测者皮肤"紊乱修复"和1皮肤抽取券</div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-name">校园躲猫猫</div>
+                                <div class="skill-desc">至少五人联机，一人抓捕其余人躲藏，通过道具抓捕/躲藏</div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-name">全新章节·运动吧！少年-第一幕（限时）</div>
+                                <div class="skill-desc">通关限时活动解锁技能·无限体力：一回合冷却。回复我方全体10%生命。</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="season-detail" id="s2-detail">
+                    <button class="back-btn">返回赛季列表</button>
+                    <h2 class="section-title">S2版本 "逃离记"</h2>
+                    <p>时间：9月1日 - 10月24日 (54天)</p>
+                    <p>【你】的定位：医生</p>
+                    
+                    <div class="section">
+                        <h3 class="section-title">赛季服装</h3>
+                        <div class="skin-list">
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">教师</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">空禅专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">病人</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">秦政专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">邮差</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">向之遥专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">军人</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">姚子麟专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-rare">
+                                <div class="skin-name">乱世·教师</div>
+                                <div class="skin-quality quality-rare">稀有</div>
+                                <div class="skin-desc">空禅专属 - 完成十次挑战升级</div>
+                                <div class="skin-effect">技能颜色特效改变</div>
+                            </div>
+                            <div class="skin-item skin-rare">
+                                <div class="skin-name">同袍情·教师</div>
+                                <div class="skin-quality quality-rare">稀有</div>
+                                <div class="skin-desc">空禅专属 - 活动期间完成十次挑战升级</div>
+                                <div class="skin-effect">技能颜色特效改变</div>
+                            </div>
+                            <div class="skin-item skin-precious">
+                                <div class="skin-name">归国华侨</div>
+                                <div class="skin-quality quality-precious">珍贵</div>
+                                <div class="skin-desc">秦政专属 - S2期间完成20次小游戏"过境？运输！要小心？！"</div>
+                                <div class="skin-effect">技能表现形式改变</div>
+                                <div class="replace-cards">
+                                    <div class="replace-card replace-purple">紫</div>
+                                </div>
+                            </div>
+                            <div class="skin-item skin-collection">
+                                <div class="skin-name">信件任战火纷飞</div>
+                                <div class="skin-quality quality-collection">典藏</div>
+                                <div class="skin-desc">向之遥专属 - S2期间抽取，60发保底</div>
+                                <div class="skin-effect">界面动态服装展示，全新指令卡皮肤·废土残章</div>
+                                <div class="replace-cards">
+                                    <div class="replace-card replace-blue">蓝</div>
+                                    <div class="replace-card replace-purple">紫</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">赛季活动</h3>
+                        <div class="skill-list">
+                            <div class="skill-item">
+                                <div class="skill-name">过境？运输！要小心？！</div>
+                                <div class="skill-desc">通过线索猜测关卡守卫是否检查，并顺利在十次机会里分别运走七批货物</div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-name">全新章节·在硝烟弥散前-第一幕（限时）</div>
+                                <div class="skill-desc">通关限时活动解锁技能·同一秒心跳：八回合。我方当回合无敌，但无法行动。</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="season-detail" id="s3-detail">
+                    <button class="back-btn">返回赛季列表</button>
+                    <h2 class="section-title">S3版本 "童趣睡衣派对"</h2>
+                    <p>时间：10月25日 - 12月7日 (54天)</p>
+                    <p>【你】的定位：身着驯兽服的派对主持人</p>
+                    
+                    <div class="section">
+                        <h3 class="section-title">赛季服装</h3>
+                        <div class="skin-list">
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">长颈鹿睡衣</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">空禅专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">毛驴睡衣</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">秦政专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">北极熊睡衣</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">向之遥专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">恐龙睡衣</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">姚子麟专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-rare">
+                                <div class="skin-name">童贞·长颈鹿睡衣</div>
+                                <div class="skin-quality quality-rare">稀有</div>
+                                <div class="skin-desc">空禅专属 - 完成十次挑战升级</div>
+                                <div class="skin-effect">技能颜色特效改变</div>
+                            </div>
+                            <div class="skin-item skin-rare">
+                                <div class="skin-name">觅顽趣·长颈鹿睡衣</div>
+                                <div class="skin-quality quality-rare">稀有</div>
+                                <div class="skin-desc">空禅专属 - 活动期间完成十二次挑战升级</div>
+                                <div class="skin-effect">技能颜色特效改变</div>
+                            </div>
+                            <div class="skin-item skin-precious">
+                                <div class="skin-name">恐龙"大"作战</div>
+                                <div class="skin-quality quality-precious">珍贵</div>
+                                <div class="skin-desc">姚子麟专属 - S3期间完成10次小游戏"枕头大战"</div>
+                                <div class="skin-effect">技能表现形式改变</div>
+                                <div class="replace-cards">
+                                    <div class="replace-card replace-blue">蓝</div>
+                                </div>
+                            </div>
+                            <div class="skin-item skin-collection">
+                                <div class="skin-name">情景·待调教倔驴</div>
+                                <div class="skin-quality quality-collection">典藏</div>
+                                <div class="skin-desc">秦政专属 - S3期间抽取，60发保底</div>
+                                <div class="skin-effect">界面动态服装展示，指令卡皮肤·野性不羁</div>
+                                <div class="replace-cards">
+                                    <div class="replace-card replace-blue">蓝</div>
+                                    <div class="replace-card replace-pink">粉</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">赛季活动</h3>
+                        <div class="skill-list">
+                            <div class="skill-item">
+                                <div class="skill-name">枕头大战</div>
+                                <div class="skill-desc">通过枕头和各种道具击败其他人，击杀数前5%即为胜利</div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-name">全新章节·勿祈祷黎明照拂-第一幕（限时）</div>
+                                <div class="skill-desc">通关限时活动解锁技能·萌化：八回合。将单敌变小，使其两回合无法使用技能。</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="season-detail" id="s4-detail">
+                    <button class="back-btn">返回赛季列表</button>
+                    <h2 class="section-title">S4版本 "雪夜古堡事件簿"</h2>
+                    <p>时间：12月8日 - 1月22日 (46天)</p>
+                    <p>【你】的定位：侦探</p>
+                    
+                    <div class="section">
+                        <h3 class="section-title">赛季服装</h3>
+                        <div class="skin-list">
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">游客甲</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">空禅专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">游客乙</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">秦政专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">游客丙</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">向之遥专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">游客丁</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">姚子麟专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-rare">
+                                <div class="skin-name">嫌疑·游客甲</div>
+                                <div class="skin-quality quality-rare">稀有</div>
+                                <div class="skin-desc">空禅专属 - 完成十次挑战升级</div>
+                                <div class="skin-effect">技能颜色特效改变</div>
+                            </div>
+                            <div class="skin-item skin-rare">
+                                <div class="skin-name">目击者·游客甲</div>
+                                <div class="skin-quality quality-rare">稀有</div>
+                                <div class="skin-desc">空禅专属 - 活动期间完成十二次挑战升级</div>
+                                <div class="skin-effect">技能颜色特效改变</div>
+                            </div>
+                            <div class="skin-item skin-precious">
+                                <div class="skin-name">月下狼</div>
+                                <div class="skin-quality quality-precious">珍贵</div>
+                                <div class="skin-desc">向之遥专属 - S4期间完成221次"档案查询"</div>
+                                <div class="skin-effect">技能表现形式改变</div>
+                                <div class="replace-cards">
+                                    <div class="replace-card replace-pink">粉</div>
+                                </div>
+                            </div>
+                            <div class="skin-item skin-collection">
+                                <div class="skin-name">幽祸百媚生</div>
+                                <div class="skin-quality quality-collection">典藏</div>
+                                <div class="skin-desc">空禅专属 - S4期间抽取，60发保底</div>
+                                <div class="skin-effect">界面动态服装展示，指令卡皮肤·青丘幽火</div>
+                                <div class="replace-cards">
+                                    <div class="replace-card replace-purple">紫</div>
+                                    <div class="replace-card replace-purple">紫</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">赛季活动</h3>
+                        <div class="skill-list">
+                            <div class="skill-item">
+                                <div class="skill-name">秦政生日活动</div>
+                                <div class="skill-desc">12月9日全服送S赛季通用抽卡券15发，12.7-12.14日限时上架生日礼包</div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-name">档案查询</div>
+                                <div class="skill-desc">每日登录可查询十次，PVP可额外获得查询次数</div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-name">全新章节·古堡侦探-第一幕：魅惑的佛克斯（限时）</div>
+                                <div class="skill-desc">通关限时活动解锁技能·这是常识，宝贝：十回合。清除敌人所有增益，每清除一种该技能冷却减一回合。</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="season-detail" id="s5-detail">
+                    <button class="back-btn">返回赛季列表</button>
+                    <h2 class="section-title">S5版本 "瑞雪兆丰年"</h2>
+                    <p>时间：1月23日 - 3月17日 (54天)</p>
+                    <p>【你】的定位：支教大学生</p>
+                    
+                    <div class="section">
+                        <h3 class="section-title">赛季服装</h3>
+                        <div class="skin-list">
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">祭祀</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">空禅专属 - 12.8-1.3签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">猎户</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">秦政专属 - 12.8-1.3签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">农民</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">向之遥专属 - 12.8-1.3签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">归客</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">姚子麟专属 - 12.8-1.3签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-rare">
+                                <div class="skin-name">人间·祭祀</div>
+                                <div class="skin-quality quality-rare">稀有</div>
+                                <div class="skin-desc">空禅专属 - 完成十次挑战升级</div>
+                                <div class="skin-effect">技能颜色特效改变</div>
+                            </div>
+                            <div class="skin-item skin-rare">
+                                <div class="skin-name">来世间·祭祀</div>
+                                <div class="skin-quality quality-rare">稀有</div>
+                                <div class="skin-desc">空禅专属 - 活动期间完成十次挑战升级</div>
+                                <div class="skin-effect">技能颜色特效改变</div>
+                            </div>
+                            <div class="skin-item skin-precious">
+                                <div class="skin-name">雪融·祭礼之诚</div>
+                                <div class="skin-quality quality-precious">珍贵</div>
+                                <div class="skin-desc">空禅专属 - S5赛季卡池限时抽取</div>
+                                <div class="skin-effect">技能表现形式改变</div>
+                                <div class="replace-cards">
+                                    <div class="replace-card replace-blue">自</div>
+                                </div>
+                            </div>
+                            <div class="skin-item skin-collection">
+                                <div class="skin-name">礼遇瑞雪，丰兆来年</div>
+                                <div class="skin-quality quality-collection">典藏</div>
+                                <div class="skin-desc">空禅专属 - S5期间抽取，60发保底</div>
+                                <div class="skin-effect">界面动态服装展示，指令卡皮肤·融雪麦穗</div>
+                                <div class="replace-cards">
+                                    <div class="replace-card replace-purple">紫</div>
+                                    <div class="replace-card replace-pink">粉</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">赛季活动</h3>
+                        <div class="skill-list">
+                            <div class="skill-item">
+                                <div class="skill-name">姚子麟生日活动</div>
+                                <div class="skill-desc">3月4日全服送S赛季通用抽卡券10发，3.2-3.9日限时上架生日礼包</div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-name">瑞雪兆丰年（消消乐玩法）</div>
+                                <div class="skill-desc">可联机pk，累计获得20000分解锁【瑞雪袭来】</div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-name">全新章节·新年-第一幕 瑞雪兆丰年（限时）</div>
+                                <div class="skill-desc">通关限时活动解锁技能·瑞雪袭来：十回合。创造冰天雪地，敌人技能冷却上限+1，持续2回合。</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="season-detail" id="s6-detail">
+                    <button class="back-btn">返回赛季列表</button>
+                    <h2 class="section-title">S6版本 "欲望，魂牵梦萦"</h2>
+                    <p>时间：3月18日 - 5月11日 (54天)</p>
+                    <p>【你】的定位：天使投资人</p>
+                    
+                    <div class="section">
+                        <h3 class="section-title">赛季服装</h3>
+                        <div class="skin-list">
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">财务会计</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">空禅专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">产业经理</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">秦政专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">市场营销专员</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">向之遥专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-common">
+                                <div class="skin-name">人力资源专员</div>
+                                <div class="skin-quality quality-common">常见</div>
+                                <div class="skin-desc">姚子麟专属 - 12日签到获得</div>
+                                <div class="skin-effect">外观改变</div>
+                            </div>
+                            <div class="skin-item skin-rare">
+                                <div class="skin-name">创业·财务会计</div>
+                                <div class="skin-quality quality-rare">稀有</div>
+                                <div class="skin-desc">空禅专属 - 完成十次挑战升级</div>
+                                <div class="skin-effect">技能颜色特效改变</div>
+                            </div>
+                            <div class="skin-item skin-rare">
+                                <div class="skin-name">制服控·财务会计</div>
+                                <div class="skin-quality quality-rare">稀有</div>
+                                <div class="skin-desc">空禅专属 - 活动期间完成挑战升级</div>
+                                <div class="skin-effect">技能颜色特效改变</div>
+                            </div>
+                            <div class="skin-item skin-precious">
+                                <div class="skin-name">牛马跑路中</div>
+                                <div class="skin-quality quality-precious">珍贵</div>
+                                <div class="skin-desc">向之遥专属 - S6期间完成20次小游戏</div>
+                                <div class="skin-effect">技能表现形式改变</div>
+                                <div class="replace-cards">
+                                    <div class="replace-card replace-blue">?</div>
+                                </div>
+                            </div>
+                            <div class="skin-item skin-collection">
+                                <div class="skin-name">酒桌下的霓虹夜色</div>
+                                <div class="skin-quality quality-collection">典藏</div>
+                                <div class="skin-desc">秦政专属 - S6期间抽取，60发保底</div>
+                                <div class="skin-effect">界面动态服装展示，指令卡皮肤·待定</div>
+                                <div class="replace-cards">
+                                    <div class="replace-card replace-blue">蓝</div>
+                                    <div class="replace-card replace-pink">粉</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">赛季活动</h3>
+                        <div class="skill-list">
+                            <div class="skill-item">
+                                <div class="skill-name">待公布</div>
+                                <div class="skill-desc">S6赛季活动详情待公布</div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-name">全新章节·待公布-第一幕（限时）</div>
+                                <div class="skill-desc">S6赛季章节详情待公布</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-autoplay_audio("music/主题曲《经过》.mp3")
-
-# ---------- 正文 ----------
-st.write("# 提瓦特旅行纪")
-
-
-# ---------- 故事描述（去掉了重复国家列表） ----------
-st.markdown(
-    """
-<div style="padding: 20px;">
-<h3 style="color: #555;">这是一个不同以往的传奇故事：</h3>
-<ul style="font-size: 1.1rem; line-height: 2;">
-<li><b style="color: #00CED1;">见证自由的囚笼</b> - 蒙德的风吹散了旧日的枷锁</li>
-<li><b style="color: #FFD700;">目睹契约的陨落</b> - 璃月的磐石终将风化</li>
-<li><b style="color: #9370DB;">跨越永恒的封锁</b> - 稻妻的雷光划破长夜</li>
-<li><b style="color: #32CD32;">触碰智慧的边界</b> - 须弥的雨林藏着禁忌</li>
-<li><b style="color: #1E90FF;">审判正义的罪孽</b> - 枫丹的法庭上演闹剧</li>
-<li><b style="color: #FF69B4;">助燃战争的余烬</b> - 纳塔的火焰永不熄灭</li>
-<li><b style="color: #FF1493;">抵达爱的理想乡</b> - 至冬的冰雪终将融化</li>
-</ul>
-</div>
-    """,
-    unsafe_allow_html=True,
-)
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 标签切换功能
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // 移除所有标签和内容的active类
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // 添加当前标签和内容的active类
+                    this.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // 隐藏所有赛季详情
+                    document.querySelectorAll('.season-detail').forEach(detail => {
+                        detail.classList.remove('active');
+                    });
+                });
+            });
+            
+            // 角色卡片点击功能
+            const characterCards = document.querySelectorAll('.character-card');
+            const characterDetails = document.querySelectorAll('.character-details');
+            
+            characterCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const characterId = this.getAttribute('data-character') + '-details';
+                    
+                    // 隐藏所有角色详情
+                    characterDetails.forEach(detail => {
+                        detail.classList.remove('active');
+                    });
+                    
+                    // 显示当前角色详情
+                    document.getElementById(characterId).classList.add('active');
+                    
+                    // 切换到角色信息标签
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    document.querySelector('.tab[data-tab="characters"]').classList.add('active');
+                    document.getElementById('characters').classList.add('active');
+                    
+                    // 隐藏所有赛季详情
+                    document.querySelectorAll('.season-detail').forEach(detail => {
+                        detail.classList.remove('active');
+                    });
+                });
+            });
+            
+            // 赛季点击功能
+            const seasonItems = document.querySelectorAll('.season-item');
+            const seasonDetails = document.querySelectorAll('.season-detail');
+            
+            seasonItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const seasonId = this.getAttribute('data-season') + '-detail';
+                    
+                    // 隐藏所有赛季详情
+                    seasonDetails.forEach(detail => {
+                        detail.classList.remove('active');
+                    });
+                    
+                    // 显示当前赛季详情
+                    document.getElementById(seasonId).classList.add('active');
+                    
+                    // 隐藏其他内容
+                    tabContents.forEach(c => c.classList.remove('active'));
+                });
+            });
+            
+            // 返回按钮功能
+            const backBtns = document.querySelectorAll('.back-btn');
+            
+            backBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 隐藏所有赛季详情
+                    seasonDetails.forEach(detail => {
+                        detail.classList.remove('active');
+                    });
+                    
+                    // 显示赛季列表
+                    document.getElementById('seasons').classList.add('active');
+                    tabs.forEach(t => t.classList.remove('active'));
+                    document.querySelector('.tab[data-tab="seasons"]').classList.add('active');
+                });
+            });
+            
+            // 搜索功能
+            const searchBox = document.querySelector('.search-box');
+            
+            searchBox.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                // 搜索角色
+                characterCards.forEach(card => {
+                    const characterName = card.querySelector('.character-name').textContent.toLowerCase();
+                    if (characterName.includes(searchTerm)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // 搜索技能
+                const skillItems = document.querySelectorAll('.skill-item');
+                skillItems.forEach(item => {
+                    const skillName = item.querySelector('.skill-name').textContent.toLowerCase();
+                    const skillDesc = item.querySelector('.skill-desc').textContent.toLowerCase();
+                    
+                    if (skillName.includes(searchTerm) || skillDesc.includes(searchTerm)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                // 搜索连招
+                const comboItems = document.querySelectorAll('.combo-item');
+                comboItems.forEach(item => {
+                    const comboName = item.querySelector('.combo-name').textContent.toLowerCase();
+                    const comboDesc = item.querySelector('.skill-desc').textContent.toLowerCase();
+                    
+                    if (comboName.includes(searchTerm) || comboDesc.includes(searchTerm)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                // 搜索赛季
+                seasonItems.forEach(item => {
+                    const seasonName = item.querySelector('.season-name').textContent.toLowerCase();
+                    const seasonDesc = item.querySelector('.season-desc').textContent.toLowerCase();
+                    
+                    if (seasonName.includes(searchTerm) || seasonDesc.includes(searchTerm)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
